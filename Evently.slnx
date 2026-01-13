@@ -1,0 +1,73 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/API/">
+    <Project Path="src/API/Evently.Api/Evently.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Common/">
+    <Project Path="src/Common/Evently.Common.Application/Evently.Common.Application.csproj" />
+    <Project Path="src/Common/Evently.Common.Domain/Evently.Common.Domain.csproj" />
+    <Project Path="src/Common/Evently.Common.Infrastructure/Evently.Common.Infrastructure.csproj" />
+    <Project Path="src/Common/Evently.Common.Presentation/Evently.Common.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Attendance/">
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.Application/Evently.Modules.Attendance.Application.csproj" />
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.Domain/Evently.Modules.Attendance.Domain.csproj" />
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.Infrastructure/Evently.Modules.Attendance.Infrastructure.csproj" />
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.IntegrationEvents/Evently.Modules.Attendance.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.Presentation/Evently.Modules.Attendance.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Attendance/test/">
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.ArchitectureTests/Evently.Modules.Attendance.ArchitectureTests.csproj" />
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.IntegrationTests/Evently.Modules.Attendance.IntegrationTests.csproj" />
+    <Project Path="src/Modules/Attendance/Evently.Modules.Attendance.UnitTest/Evently.Modules.Attendance.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Events/">
+    <Project Path="src/Modules/Events/Evently.Modules.Events.Application/Evently.Modules.Events.Application.csproj" />
+    <Project Path="src/Modules/Events/Evently.Modules.Events.Domain/Evently.Modules.Events.Domain.csproj" />
+    <Project Path="src/Modules/Events/Evently.Modules.Events.Infrastructure/Evently.Modules.Events.Infrastructure.csproj" />
+    <Project Path="src/Modules/Events/Evently.Modules.Events.IntegrationEvents/Evently.Modules.Events.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Events/Evently.Modules.Events.Presentation/Evently.Modules.Events.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Events/test/">
+    <Project Path="src/Modules/Events/Evently.Modules.Events.ArchitectureTests/Evently.Modules.Events.ArchitectureTests.csproj" />
+    <Project Path="src/Modules/Events/Evently.Modules.Events.IntegrationTests/Evently.Modules.Events.IntegrationTests.csproj" />
+    <Project Path="src/Modules/Events/Evently.Modules.Events.UnitTests/Evently.Modules.Events.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Ticketing/">
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.Application/Evently.Modules.Ticketing.Application.csproj" />
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.Domain/Evently.Modules.Ticketing.Domain.csproj" />
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.Infrastructure/Evently.Modules.Ticketing.Infrastructure.csproj" />
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.IntegrationEvents/Evently.Modules.Ticketing.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.Presentation/Evently.Modules.Ticketing.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Ticketing/test/">
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.ArchitectureTests/Evently.Modules.Ticketing.ArchitectureTests.csproj" />
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.IntegrationTests/Evently.Modules.Ticketing.IntegrationTests.csproj" />
+    <Project Path="src/Modules/Ticketing/Evently.Modules.Ticketing.UnitTests/Evently.Modules.Ticketing.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Users/">
+    <Project Path="src/Modules/Users/Evently.Modules.Users.Application/Evently.Modules.Users.Application.csproj" />
+    <Project Path="src/Modules/Users/Evently.Modules.Users.Domain/Evently.Modules.Users.Domain.csproj" />
+    <Project Path="src/Modules/Users/Evently.Modules.Users.Infrastructure/Evently.Modules.Users.Infrastructure.csproj" />
+    <Project Path="src/Modules/Users/Evently.Modules.Users.IntegrationEvents/Evently.Modules.Users.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Users/Evently.Modules.Users.Presentation/Evently.Modules.Users.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Users/test/">
+    <Project Path="src/Modules/Users/Evently.Modules.Users.ArchitectureTests/Evently.Modules.Users.ArchitectureTests.csproj" />
+    <Project Path="src/Modules/Users/Evently.Modules.Users.IntegrationTests/Evently.Modules.Users.IntegrationTests.csproj" />
+    <Project Path="src/Modules/Users/Evently.Modules.Users.UnitTests/Evently.Modules.Users.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Evently.ArchitectureTests/Evently.ArchitectureTests.csproj" />
+    <Project Path="test/Evently.IntegrationTests/Evently.IntegrationTests.csproj" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>
