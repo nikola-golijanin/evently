@@ -25,7 +25,7 @@ public class CreateEventTests : BaseIntegrationTest
         eventId,
             Faker.Music.Genre(),
             Faker.Random.Decimal(),
-            Faker.Random.String(3),
+            "EUR",
             quantity);
 
         var command = new CreateEventCommand(

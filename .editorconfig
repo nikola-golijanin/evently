@@ -355,6 +355,9 @@ dotnet_diagnostic.IDE0053.severity = none
 # IDE0270: Use coalesce expression
 dotnet_diagnostic.IDE0270.severity = none
 
+# IDE0032: Use auto-implemented property 
+dotnet_diagnostic.IDE0032.severity = none
+
 # IDE0290: Use primary constructor
 dotnet_diagnostic.IDE0290.severity = none
 
