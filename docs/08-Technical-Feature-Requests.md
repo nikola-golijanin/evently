@@ -4,9 +4,9 @@ Technical improvements, refactorings, and infrastructure changes. Organized by p
 
 ## Table of Contents
 
-- [Completed](#completed)
-  - [TFR-000: Migrate MassTransit from InMemory to PostgreSQL Transport](#tfr-000-migrate-masstransit-from-inmemory-to-postgresql-transport)
+  
 - [Priority 1: High-Impact Improvements](#priority-1-high-impact-improvements)
+- - [TFR-000: Migrate MassTransit from InMemory to PostgreSQL Transport](#tfr-000-migrate-masstransit-from-inmemory-to-postgresql-transport)
   - [TFR-001: Replace Keycloak with ASP.NET Identity](#tfr-001-replace-keycloak-with-aspnet-identity)
   - [TFR-002: Stabilize MassTransit Version](#tfr-002-stabilize-masstransit-version)
   - [TFR-003: Add Resilience with Polly](#tfr-003-add-resilience-with-polly)
@@ -24,13 +24,13 @@ Technical improvements, refactorings, and infrastructure changes. Organized by p
 
 ---
 
-## Completed
+## Priority 1: High-Impact Improvements
 
 ---
 
 ### TFR-000: Migrate MassTransit from InMemory to PostgreSQL Transport
 
-**Status:** Completed | **Branch:** `feat/move-in-memory-msg-to-postgres-masstransit`
+**Status:** In Progress | **Branch:** `feat/move-in-memory-msg-to-postgres-masstransit`
 
 **Problem:** MassTransit was configured with `UsingInMemory`, meaning all messages were lost on application restart. The CancelEventSaga state was stored in Redis via `RedisRepository`, mixing cache and state concerns. This setup was unsuitable for reliable message delivery and saga durability.
 
@@ -65,10 +65,6 @@ Technical improvements, refactorings, and infrastructure changes. Organized by p
 
 1. **Add optimistic concurrency to saga state** -- Implement `ISagaVersion` on `CancelEventState` and configure `builder.Property(x => x.Version).IsRowVersion()` in `CancelEventStateConfiguration`. This prevents concurrent saga updates from silently overwriting each other.
 2. **Remove `MassTransitPostgresMigration.md`** -- The migration plan document at the repo root served its purpose and can be deleted after merging.
-
----
-
-## Priority 1: High-Impact Improvements
 
 ---
 
@@ -411,7 +407,7 @@ Request -> L1 (IMemoryCache, in-process, ~1ms)
 
 | ID | Feature | Status | Impact | Effort | Dependencies |
 |----|---------|--------|--------|--------|-------------|
-| TFR-000 | Migrate MassTransit InMemory to PostgreSQL | Completed | High | Medium | None |
+| TFR-000 | Migrate MassTransit InMemory to PostgreSQL | In Progress | High | Medium | None |
 | TFR-001 | Replace Keycloak with ASP.NET Identity | Open | High | Medium | None |
 | TFR-002 | Stabilize MassTransit version | Partial | High | Low | None (MassTransit done in TFR-000) |
 | TFR-003 | Add resilience with Polly | Open | High | Medium | None |
