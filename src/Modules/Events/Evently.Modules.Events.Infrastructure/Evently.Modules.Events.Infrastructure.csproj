@@ -7,4 +7,7 @@
   <ItemGroup>
     <Folder Include="Database\Migrations\" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MassTransit.EntityFrameworkCore" />
+  </ItemGroup>
 </Project>

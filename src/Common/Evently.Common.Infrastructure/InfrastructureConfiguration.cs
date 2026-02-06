@@ -69,6 +69,24 @@ public static class InfrastructureConfiguration
 
         services.TryAddSingleton<ICacheService, CacheService>();
 
+        // Parse connection string for SqlTransportOptions
+        var connectionStringBuilder = new NpgsqlConnectionStringBuilder(databaseConnectionString);
+        services.AddOptions<SqlTransportOptions>().Configure(options =>
+        {
+            options.Host = connectionStringBuilder.Host!;
+            options.Port = connectionStringBuilder.Port;
+            options.Database = connectionStringBuilder.Database!;
+            options.Schema = "transport";
+            options.Role = "transport";
+            options.Username = connectionStringBuilder.Username!;
+            options.Password = connectionStringBuilder.Password!;
+            options.AdminUsername = connectionStringBuilder.Username!;
+            options.AdminPassword = connectionStringBuilder.Password!;
+        });
+
+        // Auto-create transport schema and tables
+        services.AddPostgresMigrationHostedService();
+
         services.AddMassTransit(configure =>
         {
             foreach (Action<IRegistrationConfigurator> configureConsumers in moduleConfigureConsumers)
@@ -78,7 +96,7 @@ public static class InfrastructureConfiguration
 
             configure.SetKebabCaseEndpointNameFormatter();
 
-            configure.UsingInMemory((context, cfg) =>
+            configure.UsingPostgres((context, cfg) =>
             {
                 cfg.ConfigureEndpoints(context);
             });

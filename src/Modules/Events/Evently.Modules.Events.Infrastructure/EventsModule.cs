@@ -39,11 +39,15 @@ public static class EventsModule
         return services;
     }
 
-    public static Action<IRegistrationConfigurator> ConfigureConsumers(string redisConnectionString)
+    public static Action<IRegistrationConfigurator> ConfigureConsumers()
     {
         return registration => registration
             .AddSagaStateMachine<CancelEventSaga, CancelEventState>()
-            .RedisRepository(redisConnectionString);
+            .EntityFrameworkRepository(r =>
+            {
+                r.ExistingDbContext<EventsDbContext>();
+                r.UsePostgres();
+            });
     }
 
     private static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)

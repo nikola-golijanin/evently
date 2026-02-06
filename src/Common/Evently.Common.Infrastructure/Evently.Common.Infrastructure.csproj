@@ -5,7 +5,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.Redis" />
     <PackageReference Include="AspNetCore.HealthChecks.Uris" />
     <PackageReference Include="MassTransit" />
-    <PackageReference Include="MassTransit.Redis" />
+    <PackageReference Include="MassTransit.SqlTransport.PostgreSQL" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
     <PackageReference Include="Newtonsoft.Json" />
@@ -18,8 +18,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" />
-    <PackageReference Include="Quartz.Extensions.Hosting"  />
-    <PackageReference Include="Scrutor"  />
+    <PackageReference Include="Quartz.Extensions.Hosting" />
+    <PackageReference Include="Scrutor" />
   </ItemGroup>
 
   <ItemGroup>
