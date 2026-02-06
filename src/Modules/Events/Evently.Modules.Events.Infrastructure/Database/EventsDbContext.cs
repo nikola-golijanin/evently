@@ -6,6 +6,7 @@ using Evently.Modules.Events.Domain.Events;
 using Evently.Modules.Events.Domain.TicketTypes;
 using Evently.Modules.Events.Infrastructure.Events;
 using Evently.Modules.Events.Infrastructure.TicketTypes;
+using Evently.Modules.Events.Presentation.Events.CancelEventSaga;
 using Microsoft.EntityFrameworkCore;
 
 namespace Evently.Modules.Events.Infrastructure.Database;
@@ -18,6 +19,8 @@ public sealed class EventsDbContext(DbContextOptions<EventsDbContext> options) :
 
     internal DbSet<TicketType> TicketTypes { get; set; }
 
+    public DbSet<CancelEventState> CancelEventSagaStates { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,5 +32,6 @@ public sealed class EventsDbContext(DbContextOptions<EventsDbContext> options) :
         modelBuilder.ApplyConfiguration(new InboxMessageConsumerConfiguration());
         modelBuilder.ApplyConfiguration(new EventConfiguration());
         modelBuilder.ApplyConfiguration(new TicketTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new CancelEventStateConfiguration());
     }
 }

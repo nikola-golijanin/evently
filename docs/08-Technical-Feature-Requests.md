@@ -4,6 +4,8 @@ Technical improvements, refactorings, and infrastructure changes. Organized by p
 
 ## Table of Contents
 
+- [Completed](#completed)
+  - [TFR-000: Migrate MassTransit from InMemory to PostgreSQL Transport](#tfr-000-migrate-masstransit-from-inmemory-to-postgresql-transport)
 - [Priority 1: High-Impact Improvements](#priority-1-high-impact-improvements)
   - [TFR-001: Replace Keycloak with ASP.NET Identity](#tfr-001-replace-keycloak-with-aspnet-identity)
   - [TFR-002: Stabilize MassTransit Version](#tfr-002-stabilize-masstransit-version)
@@ -19,6 +21,50 @@ Technical improvements, refactorings, and infrastructure changes. Organized by p
   - [TFR-010: Multi-Level Caching (L1 + L2)](#tfr-010-multi-level-caching-l1--l2)
   - [TFR-011: Structured Configuration Validation](#tfr-011-structured-configuration-validation)
   - [TFR-012: Enhance OpenAPI Documentation](#tfr-012-enhance-openapi-documentation)
+
+---
+
+## Completed
+
+---
+
+### TFR-000: Migrate MassTransit from InMemory to PostgreSQL Transport
+
+**Status:** Completed | **Branch:** `feat/move-in-memory-msg-to-postgres-masstransit`
+
+**Problem:** MassTransit was configured with `UsingInMemory`, meaning all messages were lost on application restart. The CancelEventSaga state was stored in Redis via `RedisRepository`, mixing cache and state concerns. This setup was unsuitable for reliable message delivery and saga durability.
+
+**What was done:**
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Message transport | InMemory (`UsingInMemory`) | PostgreSQL SQL Transport (`UsingPostgres`) |
+| Transport schema | N/A | Dedicated `transport` schema with LISTEN/NOTIFY |
+| Saga state storage | Redis (`RedisRepository`) | Entity Framework (`EntityFrameworkRepository`) |
+| Saga state table | N/A | `events.cancel_event_saga_state` (PostgreSQL) |
+| MassTransit packages | `MassTransit 9.0.1-develop.45`, `MassTransit.Redis` | `MassTransit 9.0.0` (stable), `MassTransit.SqlTransport.PostgreSQL`, `MassTransit.EntityFrameworkCore` |
+| Infrastructure | Required Redis for both cache + saga | Redis for cache only; PostgreSQL handles transport + saga |
+| Schema migration | Manual | `AddPostgresMigrationHostedService()` auto-creates transport tables |
+
+**Files changed:**
+
+- `Directory.Packages.props` -- Added `MassTransit.EntityFrameworkCore` and `MassTransit.SqlTransport.PostgreSQL` (9.0.0 stable), removed `MassTransit.Redis`, stabilized `MassTransit` from `9.0.1-develop.45` to `9.0.0`
+- `InfrastructureConfiguration.cs` -- Added `SqlTransportOptions` configuration (parsed from existing DB connection string), `AddPostgresMigrationHostedService()`, replaced `UsingInMemory` with `UsingPostgres`
+- `EventsModule.cs` -- Changed `ConfigureConsumers` to use `EntityFrameworkRepository` with `EventsDbContext` instead of `RedisRepository`; removed `redisConnectionString` parameter
+- `EventsDbContext.cs` -- Added `DbSet<CancelEventState>` and applied `CancelEventStateConfiguration`
+- `Program.cs` -- Updated `EventsModule.ConfigureConsumers()` call (no longer passes Redis connection string)
+- `Evently.Common.Infrastructure.csproj` -- Added `MassTransit.SqlTransport.PostgreSQL`, removed `MassTransit.Redis`
+- `Evently.Modules.Events.Infrastructure.csproj` -- Added `MassTransit.EntityFrameworkCore`
+
+**New files:**
+
+- `CancelEventStateConfiguration.cs` -- EF Core entity type configuration for `CancelEventState` saga state
+- `20260206150427_AddCancelEventSagaState.cs` -- EF migration creating `events.cancel_event_saga_state` table
+
+**Follow-up suggestions:**
+
+1. **Add optimistic concurrency to saga state** -- Implement `ISagaVersion` on `CancelEventState` and configure `builder.Property(x => x.Version).IsRowVersion()` in `CancelEventStateConfiguration`. This prevents concurrent saga updates from silently overwriting each other.
+2. **Remove `MassTransitPostgresMigration.md`** -- The migration plan document at the repo root served its purpose and can be deleted after merging.
 
 ---
 
@@ -99,23 +145,15 @@ Meanwhile the authorization system (roles, permissions, claims transformation) i
 
 ### TFR-002: Stabilize MassTransit Version
 
-**Problem:** The project uses `MassTransit 9.0.1-develop.45` -- a **pre-release development build**. This was likely needed for the PostgreSQL SQL Transport feature (`MassTransit.SqlTransport.PostgreSQL`), which was new in v9. Pre-release packages risk breaking changes, missing documentation, and bugs.
+**Status:** Partially completed (MassTransit stabilized in TFR-000; Newtonsoft.Json remains)
 
-Additionally, `Newtonsoft.Json 13.0.5-beta1` is also a beta version.
+**Problem:** ~~The project uses `MassTransit 9.0.1-develop.45` -- a **pre-release development build**.~~ MassTransit was stabilized to `9.0.0` as part of TFR-000. However, `Newtonsoft.Json 13.0.5-beta1` is still a beta version.
 
-**Proposal:**
-1. Upgrade to the latest stable MassTransit 9.x release
-2. Upgrade Newtonsoft.Json to the latest stable
-3. Verify the PostgreSQL transport and saga state machine still work correctly
-4. Run all integration tests after upgrade
+**Remaining work:**
+1. Upgrade Newtonsoft.Json to the latest stable release
+2. Verify serialization still works correctly (MassTransit message serialization, outbox/inbox payloads)
 
-**What to check after upgrade:**
-- `CancelEventSaga` state persistence still works
-- `IntegrationEventConsumer<T>` still receives messages
-- Outbox/inbox processing still functions
-- MassTransit auto-migration (`AddPostgresMigrationHostedService`) still runs
-
-**Risk:** Low-medium. The SQL Transport API may have changed between develop and stable. Test thoroughly.
+**Risk:** Low. Newtonsoft.Json beta-to-stable upgrades rarely have breaking changes.
 
 ---
 
@@ -371,17 +409,18 @@ Request -> L1 (IMemoryCache, in-process, ~1ms)
 
 ## Summary
 
-| ID | Feature | Impact | Effort | Dependencies |
-|----|---------|--------|--------|-------------|
-| TFR-001 | Replace Keycloak with ASP.NET Identity | High | Medium | None |
-| TFR-002 | Stabilize MassTransit version | High | Low | None |
-| TFR-003 | Add resilience with Polly | High | Medium | None |
-| TFR-004 | Expand integration test coverage | High | High | TFR-001 simplifies tests |
-| TFR-005 | Add rate limiting | Medium | Low | None |
-| TFR-006 | Add API versioning | Medium | Low | None |
-| TFR-007 | Improve health checks | Medium | Low | TFR-001 (remove Keycloak check) |
-| TFR-008 | Response compression & CORS | Medium | Low | None |
-| TFR-009 | Persist Quartz state | Medium | Medium | None |
-| TFR-010 | Multi-level caching | Medium | Medium | None |
-| TFR-011 | Config validation | Low | Low | None |
-| TFR-012 | Enhanced OpenAPI docs | Low | Medium | TFR-006 (versioning) |
+| ID | Feature | Status | Impact | Effort | Dependencies |
+|----|---------|--------|--------|--------|-------------|
+| TFR-000 | Migrate MassTransit InMemory to PostgreSQL | Completed | High | Medium | None |
+| TFR-001 | Replace Keycloak with ASP.NET Identity | Open | High | Medium | None |
+| TFR-002 | Stabilize MassTransit version | Partial | High | Low | None (MassTransit done in TFR-000) |
+| TFR-003 | Add resilience with Polly | Open | High | Medium | None |
+| TFR-004 | Expand integration test coverage | Open | High | High | TFR-001 simplifies tests |
+| TFR-005 | Add rate limiting | Open | Medium | Low | None |
+| TFR-006 | Add API versioning | Open | Medium | Low | None |
+| TFR-007 | Improve health checks | Open | Medium | Low | TFR-001 (remove Keycloak check) |
+| TFR-008 | Response compression & CORS | Open | Medium | Low | None |
+| TFR-009 | Persist Quartz state | Open | Medium | Medium | None |
+| TFR-010 | Multi-level caching | Open | Medium | Medium | None |
+| TFR-011 | Config validation | Open | Low | Low | None |
+| TFR-012 | Enhanced OpenAPI docs | Open | Low | Medium | TFR-006 (versioning) |
