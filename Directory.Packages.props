@@ -7,8 +7,8 @@
     <!-- Common Production Packages -->
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="9.0.0" />
-    <PackageVersion Include="MassTransit.SqlTransport.PostgreSQL" Version="9.0.0" />
+    <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="9.0.1" />
+    <PackageVersion Include="MassTransit.SqlTransport.PostgreSQL" Version="9.0.1" />
     <PackageVersion Include="MediatR" Version="14.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
     <PackageVersion Include="Serilog" Version="4.3.0" />
@@ -16,7 +16,7 @@
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.Uris" Version="9.0.0" />
-    <PackageVersion Include="MassTransit" Version="9.0.0" />
+    <PackageVersion Include="MassTransit" Version="9.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.5-beta1" />

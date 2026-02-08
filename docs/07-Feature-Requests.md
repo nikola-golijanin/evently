@@ -10,6 +10,7 @@ Features to implement, analyzed from a domain perspective. Organized by priority
   - [FR-003: User-Initiated Refund Requests](#fr-003-user-initiated-refund-requests)
   - [FR-004: Discount & Promo Codes](#fr-004-discount--promo-codes)
   - [FR-005: Event Organizer Ownership](#fr-005-event-organizer-ownership)
+  - [FR-014: Order Status Update on Event Cancellation](#fr-014-order-status-update-on-event-cancellation)
 - [Priority 2: Important Enhancements](#priority-2-important-enhancements)
   - [FR-006: Cart Inventory Reservation](#fr-006-cart-inventory-reservation)
   - [FR-007: Ticket Transfers](#fr-007-ticket-transfers)
@@ -184,6 +185,45 @@ These features fill critical domain gaps. Without them, the platform lacks funct
 - `GET /events/mine` -- Get events created by the current user
 
 **Affected modules:** Events (Event entity change), Users (possible Organizer role or ownership-based policies).
+
+---
+
+### FR-014: Order Status Update on Event Cancellation
+
+**Problem:** When an event is canceled, the `CancelEventSaga` orchestrates payment refunds and ticket archiving, but `Order.Status` is never updated. Orders remain `Paid` even though their payments are fully refunded and their tickets are archived. This creates an inconsistent state — the order looks like a successful purchase, but the tickets are gone and the money is returned.
+
+**Domain Concept:** `Refunded` and `Canceled` represent two distinct terminal states for an order:
+
+| Transition | Meaning |
+|------------|---------|
+| `Paid → Refunded` | Order was paid and fulfilled, then unwound (event canceled, or future user-initiated refund). A legitimate transaction that got reversed. |
+| `Pending → Canceled` | Order was never paid — abandoned, timed out, or explicitly canceled before payment. The transaction never completed. |
+
+When an event is canceled, orders should transition `Paid → Refunded` (not `Canceled`) because they were real, completed transactions. This keeps order status consistent with payment status — `Payment.AmountRefunded == Payment.Amount` aligns with `Order.Status == Refunded`.
+
+**Changes needed:**
+
+- **Domain:** `Order.Refund()` method that transitions status `Paid → Refunded` and raises `OrderRefundedDomainEvent`. Guard: only `Paid` orders can be refunded (idempotent — already refunded orders are skipped).
+- **Domain:** `Order.Cancel()` method that transitions status `Pending → Canceled` and raises `OrderCanceledDomainEvent`. Guard: only `Pending` orders can be canceled. Reserved for future use (abandoned carts, unpaid order timeout).
+- **Application:** `RefundOrdersForEventCommand` + handler (follows the existing `RefundPaymentsForEventCommand` pattern)
+- **Infrastructure:** `IOrderRepository.GetForEventAsync(Guid eventId)` — query orders via their tickets' event ID
+- **Domain Event Handler:** `RefundOrdersEventCancellationStartedHandler` — triggered when `EventCancellationStartedIntegrationEvent` is received (alongside the existing refund and archive handlers)
+
+**Business rules:**
+1. `Paid → Refunded`: triggered by event cancellation (and future user-initiated refunds via FR-003)
+2. `Pending → Canceled`: triggered when an unpaid order is abandoned or explicitly canceled (future use)
+3. Order status update happens in parallel with payment refund and ticket archiving (all triggered by the same integration event)
+4. Both transitions are idempotent — running them twice for the same event has no additional effect
+5. Future: partial refunds (FR-003) may introduce `PartiallyRefunded` status, mirroring how `Payment` already distinguishes `PaymentRefundedDomainEvent` vs `PaymentPartiallyRefundedDomainEvent`
+
+**Optional saga extension:**
+- Publish `EventOrdersRefundedIntegrationEvent` from the Ticketing module
+- Extend the saga's composite event to a 3-way wait: payments refunded + tickets archived + orders refunded
+- This adds consistency guarantees but increases saga complexity
+
+**Where it lives:** Ticketing module (domain, application, infrastructure layers).
+
+**Affected modules:** Ticketing only. No new cross-module contracts needed unless the saga extension is implemented.
 
 ---
 
@@ -417,6 +457,7 @@ Some features build on others. This shows what to implement in what order.
 ```
 FR-001 Notifications ──────────────── (standalone, high value)
 FR-005 Event Organizer Ownership ──── (standalone, enables FR-012)
+FR-014 Order Status on Cancel ─────── (standalone, completes CancelEventSaga lifecycle)
 FR-004 Discount & Promo Codes ─────── (standalone, enables FR-013)
 FR-003 User-Initiated Refunds ─────── (standalone)
 FR-002 Waitlist ────────────────────── (standalone, uses existing SoldOut event)
@@ -434,16 +475,17 @@ FR-013 Group Bookings ─────────────── (optionally 
 ```
 
 **Suggested implementation order for maximum incremental value:**
-1. FR-005 Event Organizer Ownership (small change, fundamental domain fix)
-2. FR-001 Notifications Module (new module, consumes existing events)
-3. FR-002 Waitlist (activates currently-dead integration events)
-4. FR-003 User-Initiated Refunds (exposes existing internal capability)
-5. FR-004 Discount & Promo Codes (standard commerce feature)
-6. FR-006 Cart Inventory Reservation (fixes race condition)
-7. FR-007 Ticket Transfers
-8. FR-008 Event Reviews & Ratings
-9. FR-009 Recurring Events
-10. FR-010 Venue Management
-11. FR-012 Analytics & Reporting
-12. FR-011 Seating & Sections
-13. FR-013 Group Bookings
+1. FR-014 Order Status Update on Event Cancellation (small change, fixes data inconsistency)
+2. FR-005 Event Organizer Ownership (small change, fundamental domain fix)
+3. FR-001 Notifications Module (new module, consumes existing events)
+4. FR-002 Waitlist (activates currently-dead integration events)
+5. FR-003 User-Initiated Refunds (exposes existing internal capability)
+6. FR-004 Discount & Promo Codes (standard commerce feature)
+7. FR-006 Cart Inventory Reservation (fixes race condition)
+8. FR-007 Ticket Transfers
+9. FR-008 Event Reviews & Ratings
+10. FR-009 Recurring Events
+11. FR-010 Venue Management
+12. FR-012 Analytics & Reporting
+13. FR-011 Seating & Sections
+14. FR-013 Group Bookings
