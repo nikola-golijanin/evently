@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Evently.Modules.Events.Infrastructure.Database.Migrations
 {
     [DbContext(typeof(EventsDbContext))]
-    [Migration("20260112221658_Create_Database")]
+    [Migration("20260208141714_Create_Database")]
     partial class Create_Database
     {
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace Evently.Modules.Events.Infrastructure.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("events")
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -237,6 +237,33 @@ namespace Evently.Modules.Events.Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_ticket_types_event_id");
 
                     b.ToTable("ticket_types", "events");
+                });
+
+            modelBuilder.Entity("Evently.Modules.Events.Presentation.Events.CancelEventSaga.CancelEventState", b =>
+                {
+                    b.Property<Guid>("CorrelationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<int>("CancellationCompletedStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("cancellation_completed_status");
+
+                    b.Property<string>("CurrentState")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("current_state");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("CorrelationId")
+                        .HasName("pk_cancel_event_saga_state");
+
+                    b.ToTable("cancel_event_saga_state", "events");
                 });
 
             modelBuilder.Entity("Evently.Modules.Events.Domain.Events.Event", b =>

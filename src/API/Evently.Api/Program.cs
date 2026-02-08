@@ -38,7 +38,7 @@ string redisConnectionString = builder.Configuration.GetConnectionStringOrThrow(
 builder.Services.AddInfrastructure(
     DiagnosticsConfig.ServiceName,
     [
-        EventsModule.ConfigureConsumers(redisConnectionString),
+        EventsModule.ConfigureConsumers(),
         TicketingModule.ConfigureConsumers,
         AttendanceModule.ConfigureConsumers
     ],
