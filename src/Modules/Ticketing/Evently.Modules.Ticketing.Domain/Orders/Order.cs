@@ -66,4 +66,56 @@ public sealed class Order : Entity
 
         return Result.Success();
     }
+
+    public Result Pay()
+    {
+        if (Status != OrderStatus.Pending)
+        {
+            return Result.Failure(OrderErrors.NotPending);
+        }
+
+        Status = OrderStatus.Paid;
+
+        Raise(new OrderPaidDomainEvent(Id));
+
+        return Result.Success();
+    }
+
+    public Result Refund()
+    {
+        if (Status == OrderStatus.Refunded)
+        {
+            return Result.Success();
+        }
+
+        if (Status != OrderStatus.Paid)
+        {
+            return Result.Failure(OrderErrors.NotPaid);
+        }
+
+        Status = OrderStatus.Refunded;
+
+        Raise(new OrderRefundedDomainEvent(Id));
+
+        return Result.Success();
+    }
+
+    public Result Cancel()
+    {
+        if (Status == OrderStatus.Canceled)
+        {
+            return Result.Success();
+        }
+
+        if (Status != OrderStatus.Pending)
+        {
+            return Result.Failure(OrderErrors.NotPending);
+        }
+
+        Status = OrderStatus.Canceled;
+
+        Raise(new OrderCanceledDomainEvent(Id));
+
+        return Result.Success();
+    }
 }
