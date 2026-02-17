@@ -75,6 +75,8 @@ internal sealed class CreateOrderCommandHandler(
 
         paymentRepository.Insert(payment);
 
+        order.Pay();
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
