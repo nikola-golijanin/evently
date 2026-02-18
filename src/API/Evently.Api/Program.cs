@@ -53,6 +53,7 @@ builder.Services.AddHealthChecks()
     .AddKeyCloak(keyCloakHealthUrl);
 
 builder.Configuration.AddModuleConfiguration(["users", "events", "ticketing", "attendance"]);
+builder.Configuration.AddEnvironmentVariables();  // Ensure env vars override module config (needed for Aspire)
 
 builder.Services.AddEventsModule(builder.Configuration);
 

@@ -4,7 +4,9 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
-  <Folder Name="/src/" />
+  <Folder Name="/src/">
+    <Project Path="src/Evently.AppHost/Evently.AppHost.csproj" Id="4ca39a77-6da6-40f1-9f09-54cb118da6ea" />
+  </Folder>
   <Folder Name="/src/API/">
     <Project Path="src/API/Evently.Api/Evently.Api.csproj" />
   </Folder>
