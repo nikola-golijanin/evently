@@ -30,7 +30,7 @@ Technical improvements, refactorings, and infrastructure changes. Organized by p
 
 ### TFR-000: Migrate MassTransit from InMemory to PostgreSQL Transport
 
-**Status:** In Progress | **Branch:** `feat/move-in-memory-msg-to-postgres-masstransit`
+**Status:** Completed (commit `23900e1`)
 
 **Problem:** MassTransit was configured with `UsingInMemory`, meaning all messages were lost on application restart. The CancelEventSaga state was stored in Redis via `RedisRepository`, mixing cache and state concerns. This setup was unsuitable for reliable message delivery and saga durability.
 
@@ -407,7 +407,7 @@ Request -> L1 (IMemoryCache, in-process, ~1ms)
 
 | ID | Feature | Status | Impact | Effort | Dependencies |
 |----|---------|--------|--------|--------|-------------|
-| TFR-000 | Migrate MassTransit InMemory to PostgreSQL | In Progress | High | Medium | None |
+| TFR-000 | Migrate MassTransit InMemory to PostgreSQL | Completed | High | Medium | None |
 | TFR-001 | Replace Keycloak with ASP.NET Identity | Open | High | Medium | None |
 | TFR-002 | Stabilize MassTransit version | Partial | High | Low | None (MassTransit done in TFR-000) |
 | TFR-003 | Add resilience with Polly | Open | High | Medium | None |

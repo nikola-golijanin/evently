@@ -452,20 +452,20 @@ CancelEventCommand                              (Cleanup handler)
     -> event.Cancel()
     -> Raises EventCanceledDomainEvent
     |
-    +---------------------------+
-    |                           |
-    v                           v
-ArchiveTickets                 RefundPayments
-DomainEventHandler             DomainEventHandler
-    |                           |
-    v                           v
-ArchiveTicketsForEvent         RefundPaymentsForEvent
-Command                        Command
-    |                           |
-    v                           v
-For each ticket:               For each payment:
-    ticket.Archive()               payment.Refund(fullAmount)
-    |                           |
+    +---------------------------+---------------------------+
+    |                           |                           |
+    v                           v                           v
+ArchiveTickets                 RefundPayments              RefundOrders
+DomainEventHandler             DomainEventHandler          DomainEventHandler
+    |                           |                           |
+    v                           v                           v
+ArchiveTicketsForEvent         RefundPaymentsForEvent      RefundOrdersForEvent
+Command                        Command                     Command
+    |                           |                           |
+    v                           v                           v
+For each ticket:               For each payment:           For each order:
+    ticket.Archive()               payment.Refund(amount)      order.Refund()
+    |                           |                           (Paid -> Refunded)
     v                           v
 event.TicketsArchived()        event.PaymentsRefunded()
     |                           |

@@ -152,9 +152,11 @@ Handles the entire purchase flow: cart management, order creation, payment proce
 
 **Order** -- A purchase transaction.
 - Created from cart items
-- Status: `Pending -> Paid -> Refunded/Canceled`
+- Status: `Pending -> Paid -> Refunded` or `Pending -> Canceled`
 - Contains OrderItems (line items)
 - Triggers ticket generation after creation
+- State transitions: `Pay()` (Pending->Paid), `Refund()` (Paid->Refunded), `Cancel()` (Pending->Canceled)
+- Both `Refund()` and `Cancel()` are idempotent (no-op if already in terminal state)
 
 **OrderItem** (Value Object) -- A line item within an order.
 - Links to a TicketType
@@ -185,8 +187,11 @@ Handles the entire purchase flow: cart management, order creation, payment proce
 2. Order creation is wrapped in a database transaction with pessimistic locking
 3. Available quantity is checked and decremented atomically (prevents overselling)
 4. Each ticket gets a unique ULID-based code for scanning
-5. Event cancellation triggers bulk refund of all payments and archival of all tickets
+5. Event cancellation triggers bulk refund of all payments, refund of all orders, and archival of all tickets
 6. Tickets cannot be issued twice for the same order
+7. Only pending orders can be paid (`Pending -> Paid`)
+8. Only paid orders can be refunded (`Paid -> Refunded`); idempotent if already refunded
+9. Only pending orders can be canceled (`Pending -> Canceled`); idempotent if already canceled
 
 #### Order Creation Flow (Critical Business Process)
 
@@ -367,7 +372,7 @@ This ensures modules can evolve independently and could be extracted into separa
 ### Flow 4: Event Cancellation (Saga)
 1. Organizer cancels event
 2. Saga orchestrator starts
-3. Notifies Ticketing -> refunds all payments, archives all tickets
+3. Notifies Ticketing -> refunds all payments, refunds all orders (status updated to Refunded), archives all tickets
 4. Notifies Attendance -> cleans up records
 5. Saga waits for both confirmations (composite event)
 6. Saga completes -> publishes completion event

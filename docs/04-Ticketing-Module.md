@@ -80,6 +80,9 @@ Local copy of a User, created when `UserRegisteredIntegrationEvent` is received.
 - `static Create(customer)` -- Factory. Sets status to Pending. Raises `OrderCreatedDomainEvent`.
 - `AddItem(ticketType, quantity, price, currency)` -- Adds OrderItem, recalculates TotalPrice.
 - `IssueTickets()` -- Marks `TicketsIssued = true`. Raises `OrderTicketsIssuedDomainEvent`. Fails if already issued.
+- `Pay()` -- Transitions status `Pending -> Paid`. Raises `OrderPaidDomainEvent`. Fails if not Pending.
+- `Refund()` -- Transitions status `Paid -> Refunded`. Raises `OrderRefundedDomainEvent`. Fails if not Paid. Idempotent (no-op if already Refunded).
+- `Cancel()` -- Transitions status `Pending -> Canceled`. Raises `OrderCanceledDomainEvent`. Fails if not Pending. Idempotent (no-op if already Canceled).
 
 #### OrderItem (Value Object)
 **File:** `Domain/Orders/OrderItem.cs`
@@ -190,12 +193,16 @@ Local copy of the Events module's Event, created when `EventPublishedIntegration
 | EventRescheduledDomainEvent | EventId, StartsAtUtc, EndsAtUtc | Event.Reschedule() |
 | EventPaymentsRefundedDomainEvent | EventId | Event.PaymentsRefunded() |
 | EventTicketsArchivedDomainEvent | EventId | Event.TicketsArchived() |
+| OrderPaidDomainEvent | OrderId | Order.Pay() |
+| OrderRefundedDomainEvent | OrderId | Order.Refund() |
+| OrderCanceledDomainEvent | OrderId | Order.Cancel() |
 | TicketTypeSoldOutDomainEvent | TicketTypeId | TicketType.UpdateQuantity() |
 
 ### 2.3 Repository Interfaces
 
 **IOrderRepository**
 - `Task<Order?> GetAsync(Guid id, CancellationToken ct)`
+- `Task<IReadOnlyCollection<Order>> GetForEventAsync(Guid eventId, CancellationToken ct)` -- Gets all orders for an event (via tickets' event ID)
 - `void Insert(Order order)`
 
 **ICustomerRepository**
@@ -225,6 +232,9 @@ Local copy of the Events module's Event, created when `EventPublishedIntegration
 **OrderErrors:**
 - `NotFound(Guid orderId)` -- Order not found
 - `TicketsAlreadyIssued` -- Cannot re-issue tickets
+- `NotPaid` -- Order is not in Paid status (cannot refund)
+- `AlreadyRefunded` -- Order is already refunded
+- `NotPending` -- Order is not in Pending status (cannot pay or cancel)
 
 **CustomerErrors:**
 - `NotFound(Guid customerId)` -- Customer not found
@@ -361,6 +371,17 @@ Output: Result
 ```
 Updates local Customer. Triggered by `UserProfileUpdatedIntegrationEvent`.
 
+#### Order Operations
+
+**RefundOrdersForEventCommand** (Triggered by event cancellation)
+```
+Input:  EventId
+Output: Result
+```
+1. Fetches all orders for the event via `IOrderRepository.GetForEventAsync()`
+2. Calls `order.Refund()` on each paid order (idempotent -- skips already refunded)
+3. Save changes
+
 #### Payment Operations
 
 **RefundPaymentCommand**
@@ -468,6 +489,10 @@ Output: IReadOnlyCollection<TicketResponse>
 
 #### RefundPaymentsEventCanceledDomainEventHandler
 - Sends `RefundPaymentsForEventCommand` via MediatR
+
+#### RefundOrdersEventCanceledDomainEventHandler
+- Sends `RefundOrdersForEventCommand` via MediatR
+- Runs in parallel with RefundPayments and ArchiveTickets handlers
 
 ---
 
@@ -630,6 +655,9 @@ CreateOrderCommandHandler
     +-- Payment.Create(order, transactionId, amount, currency)
     |
     +-- Insert Payment to DB
+    |
+    +-- order.Pay()
+    |       (Transitions status: Pending -> Paid)
     |
     +-- SaveChangesAsync()
     |       Outbox interceptor captures:

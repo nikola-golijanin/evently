@@ -14,7 +14,7 @@ Detailed domain and technical documentation lives in `docs/`. Consult these when
 | **Ticketing Module** | `docs/04-Ticketing-Module.md` | Order/Payment/Ticket/Cart entities, 14 commands, 10 endpoints, pessimistic locking, Redis cart, payment service |
 | **Attendance Module** | `docs/05-Attendance-Module.md` | Attendee/Ticket/EventStatistics entities, check-in logic, CQRS projection pattern, 2 endpoints |
 | **Cross-Module Communication** | `docs/06-Cross-Module-Communication.md` | Outbox/inbox pattern, MassTransit config, idempotency, 14 integration events, CancelEventSaga, reliability guarantees |
-| **Feature Requests** | `docs/07-Feature-Requests.md` | 13 planned features (FR-001 to FR-013): notifications, waitlist, refunds, promo codes, organizer ownership, cart reservation, transfers, reviews, recurring events, venues, seating, analytics, group bookings |
+| **Feature Requests** | `docs/07-Feature-Requests.md` | 14 features (FR-001 to FR-014): notifications, waitlist, refunds, promo codes, organizer ownership, order status on cancel, cart reservation, transfers, reviews, recurring events, venues, seating, analytics, group bookings |
 | **Technical Feature Requests** | `docs/08-Technical-Feature-Requests.md` | 12 technical improvements (TFR-001 to TFR-012): Keycloak->Identity migration, MassTransit stabilization, Polly resilience, test coverage, rate limiting, API versioning, health checks, compression, Quartz persistence, multi-level caching, config validation, OpenAPI |
 
 ## Build & Test Commands
@@ -39,6 +39,9 @@ dotnet run --project src/API/Evently.Api
 
 # Start infrastructure (PostgreSQL, Redis, Keycloak, Seq, Jaeger)
 docker-compose up -d
+
+# Start infrastructure via Aspire (alternative to docker-compose)
+dotnet run --project src/Evently.AppHost
 ```
 
 ## Architecture
@@ -89,16 +92,22 @@ Each module (Users, Events, Ticketing, Attendance) follows this layered pattern:
 |---------|------|---------|
 | API | 5000 | HTTP |
 | PostgreSQL | 5432 | Database |
-| Redis | 6379 | Cache & MassTransit transport |
+| Redis | 6379 | Cache |
 | Keycloak | 18080 | Identity/OAuth |
 | Seq | 8081 | Log viewer |
 | Jaeger | 16686 | Distributed tracing |
+| Aspire Dashboard | 18888 | Local dev orchestration (replaces Seq/Jaeger for local dev) |
 
 ## Tech Stack
 
 - .NET 10, ASP.NET Core Minimal APIs
 - Entity Framework Core 9 with Npgsql (PostgreSQL)
 - MediatR 14, FluentValidation 12
-- MassTransit 9 (Redis transport)
+- MassTransit 9 (PostgreSQL transport)
+- .NET Aspire (local dev orchestration)
 - Serilog, OpenTelemetry
 - xUnit, FluentAssertions, Testcontainers, NetArchTest
+
+## Last Reviewed Commit
+
+`f4fd816` - Add Aspire AppHost for infra orchestration and config

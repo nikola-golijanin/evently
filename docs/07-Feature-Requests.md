@@ -190,6 +190,8 @@ These features fill critical domain gaps. Without them, the platform lacks funct
 
 ### FR-014: Order Status Update on Event Cancellation
 
+**Status: Implemented** (commit `2f6ff2c`)
+
 **Problem:** When an event is canceled, the `CancelEventSaga` orchestrates payment refunds and ticket archiving, but `Order.Status` is never updated. Orders remain `Paid` even though their payments are fully refunded and their tickets are archived. This creates an inconsistent state — the order looks like a successful purchase, but the tickets are gone and the money is returned.
 
 **Domain Concept:** `Refunded` and `Canceled` represent two distinct terminal states for an order:
@@ -199,31 +201,23 @@ These features fill critical domain gaps. Without them, the platform lacks funct
 | `Paid → Refunded` | Order was paid and fulfilled, then unwound (event canceled, or future user-initiated refund). A legitimate transaction that got reversed. |
 | `Pending → Canceled` | Order was never paid — abandoned, timed out, or explicitly canceled before payment. The transaction never completed. |
 
-When an event is canceled, orders should transition `Paid → Refunded` (not `Canceled`) because they were real, completed transactions. This keeps order status consistent with payment status — `Payment.AmountRefunded == Payment.Amount` aligns with `Order.Status == Refunded`.
+**What was implemented:**
 
-**Changes needed:**
-
-- **Domain:** `Order.Refund()` method that transitions status `Paid → Refunded` and raises `OrderRefundedDomainEvent`. Guard: only `Paid` orders can be refunded (idempotent — already refunded orders are skipped).
-- **Domain:** `Order.Cancel()` method that transitions status `Pending → Canceled` and raises `OrderCanceledDomainEvent`. Guard: only `Pending` orders can be canceled. Reserved for future use (abandoned carts, unpaid order timeout).
+- **Domain:** `Order.Pay()`, `Order.Refund()`, `Order.Cancel()` methods with domain events (`OrderPaidDomainEvent`, `OrderRefundedDomainEvent`, `OrderCanceledDomainEvent`)
 - **Application:** `RefundOrdersForEventCommand` + handler (follows the existing `RefundPaymentsForEventCommand` pattern)
 - **Infrastructure:** `IOrderRepository.GetForEventAsync(Guid eventId)` — query orders via their tickets' event ID
-- **Domain Event Handler:** `RefundOrdersEventCancellationStartedHandler` — triggered when `EventCancellationStartedIntegrationEvent` is received (alongside the existing refund and archive handlers)
+- **Domain Event Handler:** `RefundOrdersEventCanceledDomainEventHandler` — triggered by `EventCanceledDomainEvent`, sends `RefundOrdersForEventCommand`. Runs in parallel with payment refund and ticket archival.
+- **Unit tests** for all `Pay()`, `Refund()`, and `Cancel()` scenarios
 
 **Business rules:**
 1. `Paid → Refunded`: triggered by event cancellation (and future user-initiated refunds via FR-003)
 2. `Pending → Canceled`: triggered when an unpaid order is abandoned or explicitly canceled (future use)
-3. Order status update happens in parallel with payment refund and ticket archiving (all triggered by the same integration event)
+3. Order status update happens in parallel with payment refund and ticket archiving (all triggered by the same domain event)
 4. Both transitions are idempotent — running them twice for the same event has no additional effect
-5. Future: partial refunds (FR-003) may introduce `PartiallyRefunded` status, mirroring how `Payment` already distinguishes `PaymentRefundedDomainEvent` vs `PaymentPartiallyRefundedDomainEvent`
 
-**Optional saga extension:**
-- Publish `EventOrdersRefundedIntegrationEvent` from the Ticketing module
-- Extend the saga's composite event to a 3-way wait: payments refunded + tickets archived + orders refunded
-- This adds consistency guarantees but increases saga complexity
+**Not implemented:** The optional saga extension (3-way wait with `EventOrdersRefundedIntegrationEvent`) was not added — order refund runs in parallel with payment refund and ticket archival but doesn't feed back into the saga.
 
 **Where it lives:** Ticketing module (domain, application, infrastructure layers).
-
-**Affected modules:** Ticketing only. No new cross-module contracts needed unless the saga extension is implemented.
 
 ---
 
