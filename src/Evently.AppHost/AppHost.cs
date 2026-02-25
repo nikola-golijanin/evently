@@ -26,7 +26,7 @@ IResourceBuilder<KeycloakResource> keycloak = builder
 EndpointReference keycloakEndpoint = keycloak.GetEndpoint("http");
 
 // Evently API
-builder.AddProject<Projects.Evently_Api>("evently-api")
+IResourceBuilder<ProjectResource> api = builder.AddProject<Projects.Evently_Api>("evently-api")
     .WithReference(eventlyDb)
     .WaitFor(eventlyDb)
     .WithReference(cache)
@@ -38,5 +38,11 @@ builder.AddProject<Projects.Evently_Api>("evently-api")
     .WithEnvironment("KeyCloak__HealthUrl", ReferenceExpression.Create($"{keycloakEndpoint}/health/"))
     .WithEnvironment("Users__KeyCloak__AdminUrl", ReferenceExpression.Create($"{keycloakEndpoint}/admin/realms/evently/"))
     .WithEnvironment("Users__KeyCloak__TokenUrl", ReferenceExpression.Create($"{keycloakEndpoint}/realms/evently/protocol/openid-connect/token"));
+
+// Evently Simulator
+builder.AddProject<Projects.Evently_Simulator>("evently-simulator")
+    .WaitFor(api)
+    .WithEnvironment("Simulator__TargetBaseUrl", ReferenceExpression.Create($"{api.GetEndpoint("http")}"))
+    .WithEnvironment("Simulator__KeycloakTokenUrl", ReferenceExpression.Create($"{keycloakEndpoint}/realms/evently/protocol/openid-connect/token"));
 
 await builder.Build().RunAsync();

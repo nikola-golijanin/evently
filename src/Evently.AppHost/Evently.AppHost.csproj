@@ -1,4 +1,4 @@
-﻿<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\API\Evently.Api\Evently.Api.csproj" />
+    <ProjectReference Include="..\Simulator\Evently.Simulator\Evently.Simulator.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,8 @@
+# Simulator-specific rule overrides
+[*.cs]
+
+# CA5394: Random is insecure - suppressed for non-security simulator randomness
+dotnet_diagnostic.CA5394.severity = none
+
+# CA1859: Use concrete types - suppressed for generic helper methods in the simulator
+dotnet_diagnostic.CA1859.severity = none

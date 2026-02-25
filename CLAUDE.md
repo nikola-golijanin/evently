@@ -16,6 +16,7 @@ Detailed domain and technical documentation lives in `docs/`. Consult these when
 | **Cross-Module Communication** | `docs/06-Cross-Module-Communication.md` | Outbox/inbox pattern, MassTransit config, idempotency, 14 integration events, CancelEventSaga, reliability guarantees |
 | **Feature Requests** | `docs/07-Feature-Requests.md` | 14 features (FR-001 to FR-014): notifications, waitlist, refunds, promo codes, organizer ownership, order status on cancel, cart reservation, transfers, reviews, recurring events, venues, seating, analytics, group bookings |
 | **Technical Feature Requests** | `docs/08-Technical-Feature-Requests.md` | 12 technical improvements (TFR-001 to TFR-012): Keycloak->Identity migration, MassTransit stabilization, Polly resilience, test coverage, rate limiting, API versioning, health checks, compression, Quartz persistence, multi-level caching, config validation, OpenAPI |
+| **Simulator** | `docs/09-Simulator.md` | Evently.Simulator Worker Service: purpose, project structure, bootstrap sequence, AdminWorker/ShopperWorker/AttendeeWorker, token management, state persistence, dev-only promote-admin endpoint, Aspire integration, configuration reference |
 
 ## Build & Test Commands
 

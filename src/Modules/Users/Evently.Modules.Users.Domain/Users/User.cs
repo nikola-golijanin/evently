@@ -52,4 +52,15 @@ public sealed class User : Entity
 
         Raise(new UserProfileUpdatedDomainEvent(Id, FirstName, LastName));
     }
+
+    public void PromoteToAdmin()
+    {
+        if (_roles.Any(r => r.Name == Role.Administrator.Name))
+        {
+            return;
+        }
+
+        _roles.Clear();
+        _roles.Add(Role.Administrator);
+    }
 }
