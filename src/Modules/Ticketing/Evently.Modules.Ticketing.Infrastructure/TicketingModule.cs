@@ -82,11 +82,11 @@ public static class TicketingModule
 
         services.Configure<OutboxOptions>(configuration.GetSection("Ticketing:Outbox"));
 
-        services.ConfigureOptions<ConfigureProcessOutboxJob>();
+        services.AddHostedService<ProcessOutboxJob>();
 
         services.Configure<InboxOptions>(configuration.GetSection("Ticketing:Inbox"));
 
-        services.ConfigureOptions<ConfigureProcessInboxJob>();
+        services.AddHostedService<ProcessInboxJob>();
     }
 
     private static void AddDomainEventHandlers(this IServiceCollection services)

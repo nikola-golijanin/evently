@@ -69,11 +69,11 @@ public static class EventsModule
 
         services.Configure<OutboxOptions>(configuration.GetSection("Events:Outbox"));
 
-        services.ConfigureOptions<ConfigureProcessOutboxJob>();
+        services.AddHostedService<ProcessOutboxJob>();
 
         services.Configure<InboxOptions>(configuration.GetSection("Events:Inbox"));
 
-        services.ConfigureOptions<ConfigureProcessInboxJob>();
+        services.AddHostedService<ProcessInboxJob>();
     }
 
     private static void AddDomainEventHandlers(this IServiceCollection services)

@@ -18,8 +18,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" />
-    <PackageReference Include="Quartz.Extensions.Hosting" />
-    <PackageReference Include="Scrutor" />
+<PackageReference Include="Scrutor" />
   </ItemGroup>
 
   <ItemGroup>

@@ -73,11 +73,11 @@ public static class AttendanceModule
 
         services.Configure<OutboxOptions>(configuration.GetSection("Attendance:Outbox"));
 
-        services.ConfigureOptions<ConfigureProcessOutboxJob>();
+        services.AddHostedService<ProcessOutboxJob>();
 
         services.Configure<InboxOptions>(configuration.GetSection("Attendance:Inbox"));
 
-        services.ConfigureOptions<ConfigureProcessInboxJob>();
+        services.AddHostedService<ProcessInboxJob>();
     }
 
     private static void AddDomainEventHandlers(this IServiceCollection services)

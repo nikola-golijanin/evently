@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Data.Common;
 using Dapper;
 using Evently.Common.Application.Clock;
@@ -7,29 +7,38 @@ using Evently.Common.Application.EventBus;
 using Evently.Common.Infrastructure.Inbox;
 using Evently.Common.Infrastructure.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Quartz;
 
 namespace Evently.Modules.Ticketing.Infrastructure.Inbox;
 
-[DisallowConcurrentExecution]
 internal sealed class ProcessInboxJob(
     IDbConnectionFactory dbConnectionFactory,
     IServiceScopeFactory serviceScopeFactory,
     IDateTimeProvider dateTimeProvider,
     IOptions<InboxOptions> inboxOptions,
-    ILogger<ProcessInboxJob> logger) : IJob
+    ILogger<ProcessInboxJob> logger) : BackgroundService
 {
     private const string ModuleName = "Ticketing";
 
-    public async Task Execute(IJobExecutionContext context)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await ProcessInboxMessagesAsync(stoppingToken);
+
+            await Task.Delay(TimeSpan.FromSeconds(inboxOptions.Value.IntervalInSeconds), stoppingToken);
+        }
+    }
+
+    private async Task ProcessInboxMessagesAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("{Module} - Beginning to process inbox messages", ModuleName);
 
         await using DbConnection connection = await dbConnectionFactory.OpenConnectionAsync();
-        await using DbTransaction transaction = await connection.BeginTransactionAsync();
+        await using DbTransaction transaction = await connection.BeginTransactionAsync(cancellationToken);
 
         IReadOnlyList<InboxMessageResponse> inboxMessages = await GetInboxMessagesAsync(connection, transaction);
 
@@ -52,7 +61,7 @@ internal sealed class ProcessInboxJob(
 
                 foreach (IIntegrationEventHandler integrationEventHandler in handlers)
                 {
-                    await integrationEventHandler.Handle(integrationEvent, context.CancellationToken);
+                    await integrationEventHandler.Handle(integrationEvent, cancellationToken);
                 }
             }
             catch (Exception caughtException)
@@ -69,7 +78,7 @@ internal sealed class ProcessInboxJob(
             await UpdateInboxMessageAsync(connection, transaction, inboxMessage, exception);
         }
 
-        await transaction.CommitAsync();
+        await transaction.CommitAsync(cancellationToken);
 
         logger.LogInformation("{Module} - Completed processing inbox messages", ModuleName);
     }

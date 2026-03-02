@@ -1,6 +1,14 @@
 {
   "RegularUsers": [
     {
+      "Email": "Esta_Ratke0@gmail.com",
+      "Password": "User4587!"
+    },
+    {
+      "Email": "Shanon_Kemmer@hotmail.com",
+      "Password": "User1179!"
+    },
+    {
       "Email": "German_Bernier82@yahoo.com",
       "Password": "User6030!"
     },
@@ -27,6 +35,10 @@
     {
       "Email": "Lamar_Olson@gmail.com",
       "Password": "User7009!"
+    },
+    {
+      "Email": "Kailey_Goodwin61@yahoo.com",
+      "Password": "User1021!"
     }
   ]
 }

@@ -15,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Quartz;
 using StackExchange.Redis;
 
 namespace Evently.Common.Infrastructure;
@@ -42,18 +41,9 @@ public static class InfrastructureConfiguration
         NpgsqlDataSource npgsqlDataSource = new NpgsqlDataSourceBuilder(databaseConnectionString).Build();
         services.TryAddSingleton(npgsqlDataSource);
 
-        services.TryAddScoped<IDbConnectionFactory, DbConnectionFactory>();
+        services.TryAddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 
         SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-
-        services.AddQuartz(configurator =>
-        {
-            var scheduler = Guid.NewGuid();
-            configurator.SchedulerId = $"default-id-{scheduler}";
-            configurator.SchedulerName = $"default-name-{scheduler}";
-        });
-
-        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
         try
         {

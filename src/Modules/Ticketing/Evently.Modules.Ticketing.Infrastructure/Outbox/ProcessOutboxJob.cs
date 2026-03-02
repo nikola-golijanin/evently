@@ -8,29 +8,38 @@ using Evently.Common.Domain;
 using Evently.Common.Infrastructure.Outbox;
 using Evently.Common.Infrastructure.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Quartz;
 
 namespace Evently.Modules.Ticketing.Infrastructure.Outbox;
 
-[DisallowConcurrentExecution]
 internal sealed class ProcessOutboxJob(
     IDbConnectionFactory dbConnectionFactory,
     IServiceScopeFactory serviceScopeFactory,
     IDateTimeProvider dateTimeProvider,
     IOptions<OutboxOptions> outboxOptions,
-    ILogger<ProcessOutboxJob> logger) : IJob
+    ILogger<ProcessOutboxJob> logger) : BackgroundService
 {
     private const string ModuleName = "Ticketing";
 
-    public async Task Execute(IJobExecutionContext context)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await ProcessOutboxMessagesAsync(stoppingToken);
+
+            await Task.Delay(TimeSpan.FromSeconds(outboxOptions.Value.IntervalInSeconds), stoppingToken);
+        }
+    }
+
+    private async Task ProcessOutboxMessagesAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("{Module} - Beginning to process outbox messages", ModuleName);
 
         await using DbConnection connection = await dbConnectionFactory.OpenConnectionAsync();
-        await using DbTransaction transaction = await connection.BeginTransactionAsync();
+        await using DbTransaction transaction = await connection.BeginTransactionAsync(stoppingToken);
 
         IReadOnlyList<OutboxMessageResponse> outboxMessages = await GetOutboxMessagesAsync(connection, transaction);
 
@@ -53,7 +62,7 @@ internal sealed class ProcessOutboxJob(
 
                 foreach (IDomainEventHandler domainEventHandler in handlers)
                 {
-                    await domainEventHandler.Handle(domainEvent, context.CancellationToken);
+                    await domainEventHandler.Handle(domainEvent, stoppingToken);
                 }
             }
             catch (Exception caughtException)
@@ -70,7 +79,7 @@ internal sealed class ProcessOutboxJob(
             await UpdateOutboxMessageAsync(connection, transaction, outboxMessage, exception);
         }
 
-        await transaction.CommitAsync();
+        await transaction.CommitAsync(stoppingToken);
 
         logger.LogInformation("{Module} - Completed processing outbox messages", ModuleName);
     }
