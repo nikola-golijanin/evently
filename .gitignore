@@ -24,6 +24,8 @@ bld/
 [Ll]ogs/
 # Visual Studio cache files
 .vs/
+*.playlist
+
 # Rider cache files
 .idea/
 # User-specific files
