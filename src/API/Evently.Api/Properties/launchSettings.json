@@ -28,6 +28,26 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "Homelab": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7100;http://localhost:5100",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Database": "Host=192.168.0.12;Port=5432;Username=postgres;Password=postgres;Database=evently",
+        "ConnectionStrings__Cache": "192.168.0.12:6379,password=redis",
+        "Authentication__MetadataAddress": "http://192.168.0.12:8080/realms/evently/.well-known/openid-configuration",
+        "Authentication__TokenValidationParameters__ValidIssuers__0": "http://192.168.0.12:8080/realms/evently",
+        "KeyCloak__HealthUrl": "http://192.168.0.12:8080/health/",
+        "Users__KeyCloak__AdminUrl": "http://192.168.0.12:8080/admin/realms/evently/",
+        "Users__KeyCloak__TokenUrl": "http://192.168.0.12:8080/realms/evently/protocol/openid-connect/token",
+        "Serilog__WriteTo__2__Args__serverUrl": "http://192.168.0.12:5341",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://192.168.0.12:4317",
+        "OTEL_RESOURCE_ATTRIBUTES": "service.name=evently-api-local"
+      }
+    },
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchBrowser": true,
