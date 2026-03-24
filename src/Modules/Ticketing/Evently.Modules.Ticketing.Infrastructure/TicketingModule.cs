@@ -72,6 +72,7 @@ public static class TicketingModule
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IWaitlistEntryRepository, WaitlistEntryRepository>();
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<TicketingDbContext>());
 

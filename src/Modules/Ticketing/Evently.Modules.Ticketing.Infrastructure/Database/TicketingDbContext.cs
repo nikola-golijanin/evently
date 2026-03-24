@@ -35,6 +35,8 @@ public sealed class TicketingDbContext(DbContextOptions<TicketingDbContext> opti
 
     internal DbSet<Payment> Payments { get; set; }
 
+    internal DbSet<WaitlistEntry> WaitlistEntries { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemas.Ticketing);
@@ -50,6 +52,7 @@ public sealed class TicketingDbContext(DbContextOptions<TicketingDbContext> opti
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
         modelBuilder.ApplyConfiguration(new TicketConfiguration());
         modelBuilder.ApplyConfiguration(new PaymentConfiguration());
+        modelBuilder.ApplyConfiguration(new WaitlistEntryConfiguration());
     }
 
     public async Task<DbTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)

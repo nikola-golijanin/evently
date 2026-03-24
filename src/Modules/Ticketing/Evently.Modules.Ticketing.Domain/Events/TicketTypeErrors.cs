@@ -11,4 +11,9 @@ public static class TicketTypeErrors
         Error.Problem(
             "TicketTypes.NotEnoughQuantity",
             $"The ticket type has {availableQuantity} quantity available");
+
+    public static Error InvalidEvent(Guid ticketTypeId, Guid eventId) =>
+        Error.Problem(
+            "TicketTypes.InvalidEvent",
+            $"The ticket type {ticketTypeId} does not belong to event {eventId}");
 }

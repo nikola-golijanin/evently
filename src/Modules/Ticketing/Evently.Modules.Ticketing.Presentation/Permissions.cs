@@ -8,4 +8,7 @@ internal static class Permissions
     internal const string GetOrders = "orders:read";
     internal const string CreateOrder = "orders:create";
     internal const string GetTickets = "tickets:read";
+
+    internal const string JoinWaitlist = "waitlist:join";
+
 }
