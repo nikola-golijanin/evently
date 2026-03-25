@@ -8,7 +8,11 @@ internal sealed class WaitlistEntryRepository(TicketingDbContext context) : IWai
 {
     public async Task<WaitlistEntry?> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await context.WaitlistEntries.SingleOrDefaultAsync(w => w.Id == id, cancellationToken);
+        WaitlistEntry? waitlistEntry = await context.WaitlistEntries
+            .AsNoTracking()
+            .SingleOrDefaultAsync(w => w.Id == id, cancellationToken);
+
+        return waitlistEntry;
     }
 
     public async Task<bool> ExistsAsync(

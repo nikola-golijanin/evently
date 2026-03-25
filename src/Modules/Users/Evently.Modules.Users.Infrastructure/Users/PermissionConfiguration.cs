@@ -32,7 +32,8 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
             Permission.GetTickets,
             Permission.CheckInTicket,
             Permission.GetEventStatistics,
-            Permission.WaitListJoin);
+            Permission.WaitListJoin,
+            Permission.WaitListView);
 
         builder
             .HasMany<Role>()
@@ -55,6 +56,7 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
                     CreateRolePermission(Role.Member, Permission.GetTickets),
                     CreateRolePermission(Role.Member, Permission.CheckInTicket),
                     CreateRolePermission(Role.Member, Permission.WaitListJoin),
+                    CreateRolePermission(Role.Member, Permission.WaitListView),
                     // Admin permissions
                     CreateRolePermission(Role.Administrator, Permission.GetUser),
                     CreateRolePermission(Role.Administrator, Permission.ModifyUser),
@@ -73,7 +75,8 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
                     CreateRolePermission(Role.Administrator, Permission.GetTickets),
                     CreateRolePermission(Role.Administrator, Permission.CheckInTicket),
                     CreateRolePermission(Role.Administrator, Permission.GetEventStatistics),
-                    CreateRolePermission(Role.Administrator, Permission.WaitListJoin));
+                    CreateRolePermission(Role.Administrator, Permission.WaitListJoin),
+                    CreateRolePermission(Role.Administrator, Permission.WaitListView));
             });
     }
 

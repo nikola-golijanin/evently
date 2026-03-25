@@ -20,6 +20,7 @@ public sealed class Permission
     public static readonly Permission CheckInTicket = new("tickets:check-in");
     public static readonly Permission GetEventStatistics = new("event-statistics:read");
     public static readonly Permission WaitListJoin = new("waitlist:join");
+    public static readonly Permission WaitListView = new("waitlist:view");
     public Permission(string code)
     {
         Code = code;

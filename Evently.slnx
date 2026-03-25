@@ -72,6 +72,19 @@
     <Project Path="test/Evently.ArchitectureTests/Evently.ArchitectureTests.csproj" />
     <Project Path="test/Evently.IntegrationTests/Evently.IntegrationTests.csproj" />
   </Folder>
+  <Folder Name="/docs/">
+    <File Path="docs/01-Domain.md" />
+    <File Path="docs/02-Events-Module.md" />
+    <File Path="docs/03-Users-Module.md" />
+    <File Path="docs/04-Ticketing-Module.md" />
+    <File Path="docs/05-Attendance-Module.md" />
+    <File Path="docs/06-Cross-Module-Communication.md" />
+    <File Path="docs/07-Feature-Requests.md" />
+    <File Path="docs/08-Technical-Feature-Requests.md" />
+    <File Path="docs/09-Authentication-and-Authorization.md" />
+    <File Path="docs/09-Simulator.md" />
+    <File Path="docs/10-Outbox-Pattern.md" />
+  </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
