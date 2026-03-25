@@ -25,6 +25,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Suppress file system watchers to avoid hitting Linux inotify instance limits
+        builder.UseSetting("hostBuilder:reloadConfigOnChange", "false");
+
         Environment.SetEnvironmentVariable("ConnectionStrings:Database", _dbContainer.GetConnectionString());
         Environment.SetEnvironmentVariable("ConnectionStrings:Cache", _redisContainer.GetConnectionString());
 
